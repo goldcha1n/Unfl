@@ -3,3 +3,5 @@
 *.pyc
 messenger.db
 .env
+.venv/
+venv/

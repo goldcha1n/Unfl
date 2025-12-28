@@ -4,9 +4,6 @@ import uvicorn
 # FastAPI app
 from app import app
 
-# Aiogram bot
-from bot.bot import dp, bot
-
 
 async def run_api():
     """
@@ -15,7 +12,7 @@ async def run_api():
     config = uvicorn.Config(
         app=app,
         host="0.0.0.0",  # ВАЖНО
-        port=5000,
+        port=8000,
         reload=False,
         log_level="info"
     )
@@ -24,18 +21,10 @@ async def run_api():
     await server.serve()
 
 
-async def run_bot():
-    """
-    Запуск aiogram polling.
-    """
-    await dp.start_polling(bot)
-
-
 async def main():
     # Запускаем оба сервиса параллельно
     await asyncio.gather(
-        run_api(),
-        run_bot(),
+        run_api()
     )
 
 
