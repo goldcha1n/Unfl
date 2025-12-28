@@ -1,8 +1,9 @@
+# app.py
 import os
 import aiohttp
 
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.staticfiles import StaticFiles
@@ -25,9 +26,8 @@ app.add_middleware(SessionMiddleware, secret_key="SECRET_KEY_CHANGE_ME")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
 # =========================
-# Telegram settings (через ENV, БЕЗ импорта из bot.config)
+# Telegram settings (через ENV)
 # =========================
 BOT_TOKEN = (os.getenv("BOT_TOKEN") or "").strip()
 CHAT_ID = (os.getenv("CHAT_ID") or "").strip()
@@ -302,6 +302,38 @@ async def receive_message_from_bot(data: BotMessage):
         return {"status": "error", "reason": "db_write_failed"}
 
     return {"status": "ok"}
+
+
+# =========================
+# API для автообновления чата (polling)
+# =========================
+@app.get("/api/chat/{username}/since")
+async def api_chat_since(request: Request, username: str, after_id: int = 0):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JSONResponse({"error": "unauthorized"}, status_code=401)
+
+    target_user = database.get_user_by_username(username)
+    if target_user is None:
+        return JSONResponse({"error": "user_not_found"}, status_code=404)
+
+    contacts = database.get_contacts(user_id)
+    if not any(c["id"] == target_user["id"] for c in contacts):
+        return JSONResponse({"error": "forbidden"}, status_code=403)
+
+    rows = database.get_messages_since(user_id, target_user["id"], after_id)
+
+    return {
+        "messages": [
+            {
+                "id": r["id"],
+                "sender_id": r["sender_id"],
+                "content": r["content"],
+                "timestamp": r["timestamp"],
+            }
+            for r in rows
+        ]
+    }
 
 
 if __name__ == "__main__":

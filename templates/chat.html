@@ -1,11 +1,9 @@
-<!-- chat.html (вставь кнопку в sidebar) -->
+<!-- templates/chat.html (ГОТОВЫЙ) -->
 {% extends "base.html" %}
 {% block content %}
 <div class="chat-container">
   <div class="sidebar">
-    <button class="sidebar-toggle" type="button" data-sidebar-toggle title="Свернуть/развернуть">
-      ☰
-    </button>
+    <button class="sidebar-toggle" type="button" data-sidebar-toggle title="Свернуть/развернуть">☰</button>
 
     <div class="current-user">Вы: {{ current_user.username }} | <a href="/logout">Выход</a></div>
 
@@ -35,9 +33,14 @@
     {% endif %}
 
     {% if chat_with %}
-      <div class="messages">
+      <div class="messages"
+           id="messages"
+           data-chat-with="{{ chat_with }}"
+           data-current-user-id="{{ current_user.id }}"
+           data-last-id="{% if messages and messages|length > 0 %}{{ messages[-1].id }}{% else %}0{% endif %}">
         {% for msg in messages %}
-        <div class="message {% if msg.sender_id == current_user.id %}me{% else %}other{% endif %}">
+        <div class="message {% if msg.sender_id == current_user.id %}me{% else %}other{% endif %}"
+             data-msg-id="{{ msg.id }}">
           {% if msg.sender_id == current_user.id %}
             <span class="msg-text">{{ msg.content }}</span>
             <span class="timestamp">{{ msg.timestamp }}</span>

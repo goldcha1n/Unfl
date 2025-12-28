@@ -1,4 +1,4 @@
-<!-- base.html (готовый) -->
+<!-- templates/base.html (ГОТОВЫЙ) -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -13,23 +13,96 @@
 
   <main>{% block content %}{% endblock %}</main>
 
-  <!-- JS для сворачивания сайдбара -->
+  <!-- JS: sidebar toggle + автоскролл + автообновление сообщений (polling) -->
   <script>
     (function () {
+      // ===== SIDEBAR TOGGLE =====
       const KEY = "sidebar_collapsed";
       function setCollapsed(collapsed) {
         document.body.classList.toggle("sidebar-collapsed", collapsed);
         try { localStorage.setItem(KEY, collapsed ? "1" : "0"); } catch (e) {}
       }
-      // восстановление состояния
       try { setCollapsed(localStorage.getItem(KEY) === "1"); } catch (e) {}
 
-      // делегирование клика (работает на всех страницах)
       document.addEventListener("click", function (e) {
         const btn = e.target.closest("[data-sidebar-toggle]");
         if (!btn) return;
         e.preventDefault();
         setCollapsed(!document.body.classList.contains("sidebar-collapsed"));
+      });
+
+      // ===== CHAT: AUTOSCROLL + POLLING =====
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function isNearBottom(box) {
+        return (box.scrollHeight - box.scrollTop - box.clientHeight) < 80;
+      }
+
+      function appendMessage(box, chatWith, currentUserId, m) {
+        if (box.querySelector('[data-msg-id="' + m.id + '"]')) return;
+
+        const isMe = Number(m.sender_id) === Number(currentUserId);
+        const el = document.createElement("div");
+        el.className = "message " + (isMe ? "me" : "other");
+        el.setAttribute("data-msg-id", m.id);
+
+        if (isMe) {
+          el.innerHTML =
+            '<span class="msg-text">' + escapeHtml(m.content) + '</span>' +
+            '<span class="timestamp">' + escapeHtml(m.timestamp) + '</span>';
+        } else {
+          el.innerHTML =
+            '<span class="sender-name">' + escapeHtml(chatWith) + '</span>: ' +
+            '<span class="msg-text">' + escapeHtml(m.content) + '</span>' +
+            '<span class="timestamp">' + escapeHtml(m.timestamp) + '</span>';
+        }
+        box.appendChild(el);
+      }
+
+      async function pollNewMessages() {
+        const box = document.getElementById("messages");
+        if (!box) return;
+
+        const chatWith = box.dataset.chatWith;
+        const currentUserId = box.dataset.currentUserId;
+        let lastId = Number(box.dataset.lastId || "0");
+
+        const shouldAutoScroll = isNearBottom(box);
+
+        try {
+          const res = await fetch(
+            `/api/chat/${encodeURIComponent(chatWith)}/since?after_id=${lastId}`,
+            { headers: { "Accept": "application/json" }, cache: "no-store" }
+          );
+          if (!res.ok) return;
+
+          const data = await res.json();
+          const msgs = (data && data.messages) ? data.messages : [];
+          if (!msgs.length) return;
+
+          for (const m of msgs) {
+            appendMessage(box, chatWith, currentUserId, m);
+            if (Number(m.id) > lastId) lastId = Number(m.id);
+          }
+          box.dataset.lastId = String(lastId);
+
+          if (shouldAutoScroll) box.scrollTop = box.scrollHeight;
+        } catch (e) {
+          // игнор: следующий тик попробует снова
+        }
+      }
+
+      window.addEventListener("load", function () {
+        const box = document.getElementById("messages");
+        if (box) box.scrollTop = box.scrollHeight; // при открытии всегда вниз
+        setInterval(pollNewMessages, 2000); // каждые 2 сек
       });
     })();
   </script>

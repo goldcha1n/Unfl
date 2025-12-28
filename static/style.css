@@ -1,3 +1,5 @@
+/* static/style.css */
+
 body {
   background-color: #0a0a0a;
   color: #cccccc;
@@ -113,6 +115,7 @@ button:focus {
   flex-shrink: 0;
   padding: 10px;
   border-right: 2px solid #333;
+  position: relative; /* для кнопки */
 }
 
 .current-user {
@@ -160,19 +163,18 @@ button:focus {
   margin-top: 0;
 }
 
-/* 🔥 КЛЮЧЕВОЕ МЕСТО */
+/* messages */
 .messages {
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-
-  padding-left: 20px;   /* ← отступ ТОЛЬКО слева */
+  padding-left: 20px;
   padding-right: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
+  scroll-behavior: smooth;
 }
-
 
 .message {
   max-width: 70%;
@@ -222,12 +224,8 @@ button:focus {
   margin-top: 20px;
 }
 
-/* style.css (добавь в конец) */
+/* ===== SIDEBAR TOGGLE BUTTON ===== */
 
-/* кнопка */
-.sidebar {
-  position: relative;
-}
 .sidebar-toggle {
   position: absolute;
   top: 8px;
@@ -239,12 +237,13 @@ button:focus {
   cursor: pointer;
   font: inherit;
 }
+
 .sidebar-toggle:hover {
   background-color: #00ff00;
   color: #000000;
 }
 
-/* анимация + состояние */
+/* анимация */
 .sidebar,
 .chat-area {
   transition: all 0.2s ease;
