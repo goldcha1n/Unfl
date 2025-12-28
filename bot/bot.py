@@ -6,7 +6,7 @@ from aiogram.enums import ChatType
 from aiogram.filters import CommandStart
 from typing import Optional, Tuple
 
-from bot.config import BOT_TOKEN, API_URL, GROUP_CHAT_ID
+from config import BOT_TOKEN, API_URL, GROUP_CHAT_ID
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
