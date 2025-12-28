@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="chat-container">
+  <div class="sidebar">
+    <div class="current-user">Вы: {{ current_user.username }} | <a href="/logout">Выход</a></div>
+
+    <ul class="contact-list">
+      {% for contact in contacts %}
+      <li class="{% if chat_with and contact.username == chat_with %}active{% endif %}">
+        <a href="/chat/{{ contact.username }}">{{ contact.username }}</a>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <form class="add-contact-form" action="/contacts" method="post">
+      <input type="text" name="username" placeholder="Имя пользователя..." required>
+      <button type="submit">Добавить</button>
+    </form>
+  </div>
+
+  <div class="chat-area">
+    {% if chat_with %}
+      <h2>Чат с {{ chat_with }}</h2>
+    {% else %}
+      <h2>Мои контакты</h2>
+    {% endif %}
+
+    {% if flash_msg %}
+      <div class="flash {{ flash_category }}">{{ flash_msg }}</div>
+    {% endif %}
+
+    {% if chat_with %}
+      <div class="messages">
+        {% for msg in messages %}
+        <div class="message {% if msg.sender_id == current_user.id %}me{% else %}other{% endif %}">
+          {% if msg.sender_id == current_user.id %}
+            <span class="msg-text">{{ msg.content }}</span>
+            <span class="timestamp">{{ msg.timestamp }}</span>
+          {% else %}
+            <span class="sender-name">{{ chat_with }}</span>:
+            <span class="msg-text">{{ msg.content }}</span>
+            <span class="timestamp">{{ msg.timestamp }}</span>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <form class="message-form" action="/chat/{{ chat_with }}" method="post">
+        <input type="text" name="content" placeholder="Сообщение..." required>
+        <button type="submit">Отправить</button>
+      </form>
+    {% else %}
+      <p class="no-chat">Выберите контакт слева или добавьте новый контакт.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
