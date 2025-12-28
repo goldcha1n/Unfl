@@ -1,7 +1,12 @@
+<!-- chat.html (вставь кнопку в sidebar) -->
 {% extends "base.html" %}
 {% block content %}
 <div class="chat-container">
   <div class="sidebar">
+    <button class="sidebar-toggle" type="button" data-sidebar-toggle title="Свернуть/развернуть">
+      ☰
+    </button>
+
     <div class="current-user">Вы: {{ current_user.username }} | <a href="/logout">Выход</a></div>
 
     <ul class="contact-list">

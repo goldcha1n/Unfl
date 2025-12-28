@@ -1,3 +1,4 @@
+<!-- base.html (готовый) -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -9,6 +10,28 @@
 </head>
 <body>
   <header><h1>Киберпанк Мессенджер</h1></header>
+
   <main>{% block content %}{% endblock %}</main>
+
+  <!-- JS для сворачивания сайдбара -->
+  <script>
+    (function () {
+      const KEY = "sidebar_collapsed";
+      function setCollapsed(collapsed) {
+        document.body.classList.toggle("sidebar-collapsed", collapsed);
+        try { localStorage.setItem(KEY, collapsed ? "1" : "0"); } catch (e) {}
+      }
+      // восстановление состояния
+      try { setCollapsed(localStorage.getItem(KEY) === "1"); } catch (e) {}
+
+      // делегирование клика (работает на всех страницах)
+      document.addEventListener("click", function (e) {
+        const btn = e.target.closest("[data-sidebar-toggle]");
+        if (!btn) return;
+        e.preventDefault();
+        setCollapsed(!document.body.classList.contains("sidebar-collapsed"));
+      });
+    })();
+  </script>
 </body>
 </html>

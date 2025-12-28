@@ -168,7 +168,7 @@ button:focus {
   flex-direction: column;
 
   padding-left: 20px;   /* ← отступ ТОЛЬКО слева */
-  padding-right: 400px;
+  padding-right: 20px;
   padding-top: 10px;
   padding-bottom: 10px;
 }
@@ -220,4 +220,50 @@ button:focus {
   color: #888888;
   font-style: italic;
   margin-top: 20px;
+}
+
+/* style.css (добавь в конец) */
+
+/* кнопка */
+.sidebar {
+  position: relative;
+}
+.sidebar-toggle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #111;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  padding: 6px 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.sidebar-toggle:hover {
+  background-color: #00ff00;
+  color: #000000;
+}
+
+/* анимация + состояние */
+.sidebar,
+.chat-area {
+  transition: all 0.2s ease;
+}
+
+/* свернутый sidebar */
+body.sidebar-collapsed .sidebar {
+  width: 56px;
+  padding: 10px 6px;
+}
+
+/* скрываем контент сайдбара, оставляем кнопку */
+body.sidebar-collapsed .sidebar .current-user,
+body.sidebar-collapsed .sidebar .contact-list,
+body.sidebar-collapsed .sidebar .add-contact-form {
+  display: none;
+}
+
+/* немного подвинем кнопку в узком режиме */
+body.sidebar-collapsed .sidebar-toggle {
+  right: 6px;
 }
